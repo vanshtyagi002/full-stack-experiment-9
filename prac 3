@@ -1,0 +1,78 @@
+Here’s a high-level step-by-step workflow to **deploy a full stack (React + Node.js/Express + optional MongoDB) app on AWS with load balancing (ALB):**
+
+***
+
+### **Step 1: Prep Your App Locally**
+- Build your React frontend (`npm run build`)
+- Set up your Node.js/Express backend (API server)
+- Optional: Prepare your MongoDB connection URI
+
+***
+
+### **Step 2: Launch EC2 Instances**
+- **Backend:** Start 2+ EC2 instances for your Node.js/Express server
+- **Frontend:** Start 1 EC2 instance for the React build (served via Nginx or similar)
+- Install Node.js, clone your repositories, install dependencies (`npm install`), and start servers
+
+***
+
+### **Step 3: Set Up Security Groups**
+- Allow HTTP/HTTPS ports (80, 443) to your instances and ALB
+- Backend: Open ports for ALB-to-backend (default 80, or your API port)
+- MongoDB (if self-hosted): Open port 27017 but restrict access for security
+
+***
+
+### **Step 4: Configure VPC (default is fine for simple setup)**
+- Make sure all EC2 instances and ALB are in the same VPC
+- Use public subnets for demo (private for real production setups)
+
+***
+
+### **Step 5: Deploy the App**
+- **Backend EC2s:** Start your Express server on each (same code, different instances)
+- **Frontend EC2:** Serve the React build using Nginx or serve the static build
+
+***
+
+### **Step 6: Create an AWS Application Load Balancer (ALB)**
+- In AWS Console: EC2 > Load Balancers > Create Load Balancer > Application Load Balancer
+- Configure listeners (port 80/443), select the VPC and public subnets
+- Register your backend EC2 instances as targets in a target group
+- ALB will now distribute API traffic (e.g. `/api`) across your EC2 backend servers
+
+***
+
+### **Step 7: Set Up Domain Routing (Optional, Route 53)**
+- Buy a domain or use an existing one
+- Route domain to ALB DNS using AWS Route 53 (CNAME/A record pointing to ALB DNS)
+
+***
+
+### **Step 8: Testing**
+- Access the frontend app via its public IP or domain.
+- API requests from frontend should route through the ALB and be balanced across backend instances.
+- Check ALB target health in AWS Console.
+
+***
+
+### **Step 9: Scalability & Fault Tolerance**
+- Try stopping a backend EC2: ALB will route traffic to remaining healthy instances.
+- Add/remove backend EC2 instances for scaling as needed.
+
+***
+
+**Expected Output:**
+- **Your app loads in a browser via public URL**
+- **API requests are distributed by ALB**
+- **If a backend instance fails, ALB still serves users (high availability)**
+
+***
+
+**Resources:**
+- AWS EC2 docs
+- AWS Elastic Load Balancing docs
+- AWS VPC docs
+- [AWS tutorial: Deploy MERN app with load balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html)
+
+If you need a specific step/command for any part, just ask!
